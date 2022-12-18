@@ -1,0 +1,76 @@
+---
+title: "MA615 Final Project"
+author: "Kaiwei Xiao"
+date: "2022-12-17"
+output:
+  word_document: default
+  pdf_document: default
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+Q1 = read.csv(
+  "/Users/j/MA615/final project/TravelTimes_2022/2022-Q1_LRTravelTimes.csv")
+```
+
+It's not reasonable but for some reason I just want to find if there is
+any relationship between the stop id and travel time.
+
+Below is a simple linear regression
+
+```{r}
+m1 = lm(from_stop_id ~ travel_time_sec, data = Q1)
+summary(m1)
+```
+
+The significant coefficient do shows some relationship. But how? Let's
+plot them.
+
+```{r}
+plot(from_stop_id ~ travel_time_sec, data = Q1)
+```
+
+It seems like if we do a logistic regression there will be more sense
+there. First I map thoese stop id into 0 to 1 range. Then I do a
+logistic regression
+
+```{r}
+library(scales)
+tstop = rescale(Q1$from_stop_id, to=c(0,1))
+m2 = glm(tstop ~ travel_time_sec, data = Q1, family = "binomial")
+summary(m2)
+```
+
+The summary give us evidence that the model fit well. Which means if you
+know the travel time, you can give a probability that which stop id you
+are start from.
+
+Let's check the travel time histogram
+
+```{r}
+hist(Q1$travel_time_sec, breaks = 50)
+```
+
+Most of the travel time are very short and close to 0.
+
+##Shiny app
+
+for the shiny app there are two version
+
+The first version is driving map, which allow you to add waypoint on it.
+Simply type in the departure address and final destination (waypoints if
+needed), you can get the driving routine. Also use your map key and API
+key if possible.
+
+#published link: <https://jpz61m-jeremy-x0.shinyapps.io/Driving_Map/>
+
+The second version is transit map. It allows you travel through public
+transportation but no waypoints due to the API limitation.
+
+#published link: <https://jpz61m-jeremy-x0.shinyapps.io/Transit_Map/>
